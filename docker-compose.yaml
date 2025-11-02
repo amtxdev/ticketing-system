@@ -1,0 +1,148 @@
+services:
+  # PostgreSQL Database - Production-ready configuration
+  postgres:
+    image: postgres:15-alpine
+    container_name: ticketing-postgres
+    environment:
+      - POSTGRES_USER=ticketing_user
+      - POSTGRES_PASSWORD=ticketing_pass
+      - POSTGRES_DB=ticketing_db
+      # Security: Disable logging of connection attempts (adjust for production)
+      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # TODO: Add init scripts for schema/migrations in production
+    networks:
+      - ticketing-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ticketing_user -d ticketing_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    # Security: Run as non-root user (PostgreSQL handles this internally)
+    # Scalability: Configure connection pooling in app, not here
+    # TODO: For production, use managed database service (RDS, Cloud SQL, etc.)
+
+  # MinIO - S3-compatible Object Storage
+  minio:
+    image: minio/minio:latest
+    container_name: ticketing-minio
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+      # TODO: Change credentials in production using secrets management
+    ports:
+      - "9000:9000"  # API
+      - "9001:9001"  # Console
+    volumes:
+      - minio_data:/data
+    networks:
+      - ticketing-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    # Scalability: MinIO supports distributed mode for production
+    # TODO: Configure bucket policies, CORS, and access keys via MinIO client
+
+  # MinIO Client - Initialize buckets on startup
+  minio-init:
+    image: minio/mc:latest
+    container_name: ticketing-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set myminio http://minio:9000 minioadmin minioadmin;
+      mc mb myminio/event-images --ignore-existing;
+      mc mb myminio/user-uploads --ignore-existing;
+      mc anonymous set download myminio/event-images;
+      echo 'MinIO buckets initialized';
+      "
+    networks:
+      - ticketing-network
+    profiles:
+      - init
+
+  # Backend API - Stateless, scalable
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ticketing-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=postgresql://ticketing_user:ticketing_pass@postgres:5432/ticketing_db
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=ticketing_user
+      - DB_PASSWORD=ticketing_pass
+      - DB_NAME=ticketing_db
+      - JWT_SECRET=${JWT_SECRET:-change-this-secret-in-production}
+      - JWT_EXPIRES_IN=7d
+      # Object Storage Configuration
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_BUCKET_EVENTS=event-images
+      - MINIO_USE_SSL=false
+      # TODO: Use secrets management (Docker secrets, AWS Secrets Manager, etc.)
+    volumes:
+      # For development, mount source code
+      - ./backend/src:/app/src
+    networks:
+      - ticketing-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # Scalability: Stateless design - can scale horizontally
+    # TODO: Add load balancer (nginx, traefik) in front of multiple backend instances
+    # TODO: Configure resource limits (memory, CPU) for production
+    deploy:
+      # Docker Swarm/Kubernetes style configuration (for production)
+      replicas: 1
+      # TODO: Increase replicas and add load balancer for horizontal scaling
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+volumes:
+  postgres_data:
+    # TODO: Configure backup strategy for production
+    # TODO: Use managed volume providers (EBS, persistent disks, etc.)
+  minio_data:
+    # TODO: Configure backup and lifecycle policies for object storage
+
+networks:
+  ticketing-network:
+    driver: bridge
+    # Security: Isolated network - services can only communicate within network
+    # TODO: Configure network policies for production (only allow necessary ports)
+    # TODO: Use overlay networks for multi-host deployments (Swarm/Kubernetes)
+

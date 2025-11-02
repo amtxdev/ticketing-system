@@ -1,0 +1,104 @@
+import express, { Request, Response } from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import { testConnection } from "./db/connection";
+import { initializeDatabase } from "./db/migrations";
+import { seedDefaultAdmin } from "./db/seed";
+import ticketRoutes from "./routes/ticketRoutes";
+import authRoutes from "./routes/authRoutes";
+import userRoutes from "./routes/userRoutes";
+import eventRoutes from "./routes/eventRoutes";
+
+// Load environment variables
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Health check endpoint
+app.get("/health", async (req: Request, res: Response) => {
+  const dbConnected = await testConnection();
+  res.json({ 
+    status: dbConnected ? "ok" : "degraded",
+    message: "Ticketing System API is running",
+    database: dbConnected ? "connected" : "disconnected",
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Root endpoint
+app.get("/", (req: Request, res: Response) => {
+  res.json({ 
+    message: "Ticketing System API",
+    version: "1.0.0",
+    endpoints: {
+      health: "/health",
+      auth: "/api/auth",
+      users: "/api/users",
+      events: "/api/events",
+      tickets: "/api/tickets"
+    }
+  });
+});
+
+// API Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/events", eventRoutes);
+app.use("/api/tickets", ticketRoutes);
+
+// Error handling middleware
+app.use((err: Error, req: Request, res: Response, next: Function) => {
+  console.error("Unhandled error:", err);
+  res.status(500).json({
+    error: "Internal server error",
+    message: err.message || "An unexpected error occurred",
+  });
+});
+
+// 404 handler
+app.use((req: Request, res: Response) => {
+  res.status(404).json({
+    error: "Not found",
+    message: `Route ${req.method} ${req.path} not found`,
+  });
+});
+
+// Initialize database and start server
+async function startServer() {
+  try {
+    // Test database connection
+    const connected = await testConnection();
+    if (!connected) {
+      console.error("❌ Failed to connect to database. Retrying...");
+      // In production, you might want to retry or exit
+    }
+
+    // Initialize database tables
+    await initializeDatabase();
+
+    // Seed default admin user
+    await seedDefaultAdmin();
+
+    // Start server
+    app.listen(PORT, () => {
+      console.log(`🚀 Server is running on port ${PORT}`);
+      console.log(`📍 Health check: http://localhost:${PORT}/health`);
+      console.log(`📍 API base: http://localhost:${PORT}/api`);
+      console.log(`📍 Auth API: http://localhost:${PORT}/api/auth`);
+      console.log(`📍 Users API: http://localhost:${PORT}/api/users`);
+      console.log(`📍 Events API: http://localhost:${PORT}/api/events`);
+      console.log(`📍 Tickets API: http://localhost:${PORT}/api/tickets`);
+    });
+  } catch (error) {
+    console.error("❌ Failed to start server:", error);
+    process.exit(1);
+  }
+}
+
+startServer();
