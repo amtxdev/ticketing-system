@@ -3,19 +3,44 @@ import { pool } from "./connection";
 
 export async function seedDefaultAdmin(): Promise<void> {
   try {
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
 
-    const adminEmail = `${process.env.ADMIN_EMAIL}`;
-    const adminPassword = `${process.env.ADMIN_PASSWORD}`;
-    
-    // Check if admin already exists
+    // Validate environment variables
+    if (!adminEmail || !adminPassword) {
+      console.error("ADMIN_EMAIL and ADMIN_PASSWORD environment variables must be set");
+      throw new Error("Admin credentials not configured");
+    }
+
+    // Check if admin with correct email already exists
     const existingAdmin = await pool.query(
-      "SELECT id FROM users WHERE email = $1",
+      "SELECT id FROM users WHERE email = $1 AND role = 'admin'",
       [adminEmail]
     );
 
     if (existingAdmin.rows.length > 0) {
-      console.log("Default admin user already exists");
+      // Update password in case it was set incorrectly before
+      const saltRounds = 10;
+      const passwordHash = await bcrypt.hash(adminPassword, saltRounds);
+      await pool.query(
+        "UPDATE users SET password_hash = $1 WHERE email = $2 AND role = 'admin'",
+        [passwordHash, adminEmail]
+      );
+      console.log(`Default admin user already exists with email: ${adminEmail}`);
+      console.log(`Password has been updated`);
       return;
+    }
+
+    // Check for and remove any admin with "undefined" email (from previous incorrect seeding)
+    const undefinedAdmin = await pool.query(
+      "SELECT id FROM users WHERE email = 'undefined' AND role = 'admin'"
+    );
+
+    if (undefinedAdmin.rows.length > 0) {
+      console.log("Found admin user with 'undefined' email, removing it...");
+      await pool.query(
+        "DELETE FROM users WHERE email = 'undefined' AND role = 'admin'"
+      );
     }
 
     // Hash password

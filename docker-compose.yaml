@@ -19,7 +19,7 @@ services:
       - ticketing-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\" || exit 1"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ticketing_db || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -94,6 +94,9 @@ services:
       - DB_NAME=${DB_NAME}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=${JWT_EXPIRES}
+      # Admin Credentials (for seeding)
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       # Object Storage Configuration
       - MINIO_ENDPOINT=minio
       - MINIO_PORT=9000
