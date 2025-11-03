@@ -9,6 +9,7 @@ export class AuthController {
     try {
       const data: RegisterDto = req.body;
 
+
       // Validation
       if (!data.email || !data.email.trim()) {
         res.status(400).json({
@@ -22,6 +23,22 @@ export class AuthController {
         res.status(400).json({
           error: "Validation error",
           message: "Password must be at least 6 characters",
+        });
+        return;
+      }
+
+      if (!data.first_name || !data.first_name.trim()) {
+        res.status(400).json({
+          error: "Validation error",
+          message: "First name is required",
+        });
+        return;
+      }
+
+      if (!data.last_name || !data.last_name.trim()) {
+        res.status(400).json({
+          error: "Validation error",
+          message: "Last name is required",
         });
         return;
       }
@@ -42,12 +59,65 @@ export class AuthController {
     }
   }
 
-  async login(req: Request, res: Response): Promise<void> {
+  async registerAdmin(req: Request, res: Response): Promise<void> {
     try {
-      const data: LoginDto = req.body;
+      const data: RegisterDto = req.body;
 
-      // Validation
+      // validation
       if (!data.email || !data.email.trim()) {
+        res.status(400).json({
+          error: "Validation error",
+          message: "Email is required",
+        });
+        return;
+      }
+
+      if (!data.password || data.password.length < 6) {
+        res.status(400).json({
+          error: "Validation error",
+          message: "Password must be at least 6 characters",
+        });
+        return;
+      }
+
+      if (!data.first_name || !data.first_name.trim()) {
+        res.status(400).json({
+          error: "Validation error",
+          message: "First name is required",
+        });
+        return;
+      }
+
+      if (!data.last_name || !data.last_name.trim()) {
+        res.status(400).json({
+          error: "Validation error",
+          message: "Last name is required",
+        });
+        return;
+      } 
+
+      const result = await authService.registerAdmin(data);
+      res.status(201).json({
+        message: "Admin registered successfully",
+        data: result.user,
+        token: result.token,
+      });
+    } catch (error: any) {
+      console.error("Error registering admin:", error);
+      const statusCode = error.message.includes("already exists") ? 409 : 500;
+      res.status(statusCode).json({
+        error: statusCode === 409 ? "Conflict" : "Internal server error",
+        message: error.message || "Failed to register admin",
+      });
+    }
+  }
+
+  async login(req: Request, res: Response): Promise < void> {
+        try {
+          const data: LoginDto = req.body;
+
+          // Validation
+          if(!data.email || !data.email.trim()) {
         res.status(400).json({
           error: "Validation error",
           message: "Email is required",

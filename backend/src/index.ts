@@ -13,7 +13,7 @@ import eventRoutes from "./routes/eventRoutes";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.BE_PORT;
 
 // Middleware
 app.use(cors());
@@ -75,7 +75,7 @@ async function startServer() {
     // Test database connection
     const connected = await testConnection();
     if (!connected) {
-      console.error("❌ Failed to connect to database. Retrying...");
+      console.error("Failed to connect to database. Retrying...");
       // In production, you might want to retry or exit
     }
 
@@ -87,16 +87,16 @@ async function startServer() {
 
     // Start server
     app.listen(PORT, () => {
-      console.log(`🚀 Server is running on port ${PORT}`);
-      console.log(`📍 Health check: http://localhost:${PORT}/health`);
-      console.log(`📍 API base: http://localhost:${PORT}/api`);
-      console.log(`📍 Auth API: http://localhost:${PORT}/api/auth`);
-      console.log(`📍 Users API: http://localhost:${PORT}/api/users`);
-      console.log(`📍 Events API: http://localhost:${PORT}/api/events`);
-      console.log(`📍 Tickets API: http://localhost:${PORT}/api/tickets`);
+      console.log(`Server is running on port ${PORT}`);
+      console.log(`Health check: http://localhost:${PORT}/health`);
+      console.log(`API base: http://localhost:${PORT}/api`);
+      console.log(`Auth API: http://localhost:${PORT}/api/auth`);
+      console.log(`Users API: http://localhost:${PORT}/api/users`);
+      console.log(`Events API: http://localhost:${PORT}/api/events`);
+      console.log(`Tickets API: http://localhost:${PORT}/api/tickets`);
     });
   } catch (error) {
-    console.error("❌ Failed to start server:", error);
+    console.error("Failed to start server:", error);
     process.exit(1);
   }
 }

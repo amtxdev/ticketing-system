@@ -4,13 +4,14 @@ services:
     image: postgres:15-alpine
     container_name: ticketing-postgres
     environment:
-      - POSTGRES_USER=ticketing_user
-      - POSTGRES_PASSWORD=ticketing_pass
-      - POSTGRES_DB=ticketing_db
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      
       # Security: Disable logging of connection attempts (adjust for production)
       - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256
     ports:
-      - "5432:5432"
+      - ${DB_PORT}:${DB_PORT}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       # TODO: Add init scripts for schema/migrations in production
@@ -80,18 +81,19 @@ services:
       dockerfile: Dockerfile
     container_name: ticketing-backend
     ports:
-      - "3000:3000"
+      - ${BE_PORT}:${BE_PORT}
     environment:
       - NODE_ENV=production
-      - PORT=3000
-      - DATABASE_URL=postgresql://ticketing_user:ticketing_pass@postgres:5432/ticketing_db
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USER=ticketing_user
-      - DB_PASSWORD=ticketing_pass
-      - DB_NAME=ticketing_db
-      - JWT_SECRET=${JWT_SECRET:-change-this-secret-in-production}
-      - JWT_EXPIRES_IN=7d
+      - PORT=${BE_PORT}
+      - BE_PORT=${BE_PORT}
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES}
       # Object Storage Configuration
       - MINIO_ENDPOINT=minio
       - MINIO_PORT=9000
@@ -145,4 +147,6 @@ networks:
     # Security: Isolated network - services can only communicate within network
     # TODO: Configure network policies for production (only allow necessary ports)
     # TODO: Use overlay networks for multi-host deployments (Swarm/Kubernetes)
+
+
 

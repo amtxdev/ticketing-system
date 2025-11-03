@@ -1,15 +1,11 @@
 import bcrypt from "bcryptjs";
 import { pool } from "./connection";
 
-/**
- * Seed default admin user
- * Password: admin123
- * WARNING: Change this password in production!
- */
 export async function seedDefaultAdmin(): Promise<void> {
   try {
-    const adminEmail = "admin@example.com";
-    const adminPassword = "admin123"; // CHANGE IN PRODUCTION!
+
+    const adminEmail = `${process.env.ADMIN_EMAIL}`;
+    const adminPassword = `${process.env.ADMIN_PASSWORD}`;
     
     // Check if admin already exists
     const existingAdmin = await pool.query(
@@ -18,7 +14,7 @@ export async function seedDefaultAdmin(): Promise<void> {
     );
 
     if (existingAdmin.rows.length > 0) {
-      console.log("ℹ️  Default admin user already exists");
+      console.log("Default admin user already exists");
       return;
     }
 
@@ -33,12 +29,12 @@ export async function seedDefaultAdmin(): Promise<void> {
       [adminEmail, passwordHash, "Admin", "User", "admin"]
     );
 
-    console.log("✅ Default admin user created");
-    console.log(`   Email: ${adminEmail}`);
-    console.log(`   Password: ${adminPassword}`);
-    console.log("   ⚠️  WARNING: Change this password in production!");
+    console.log("Default admin user created");
+    console.log(`Email: ${adminEmail}`);
+    console.log(`Password: ${adminPassword}`);
+    console.log("WARNING: Change this password in production!");
   } catch (error) {
-    console.error("❌ Error seeding default admin:", error);
+    console.error("Error seeding default admin:", error);
     throw error;
   }
 }

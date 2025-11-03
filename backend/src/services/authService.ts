@@ -54,6 +54,50 @@ export class AuthService {
     };
   }
 
+  async registerAdmin(data: RegisterDto): Promise<{ user: Omit<User, "password_hash">; token: string }> {
+    const existingAdmin = await pool.query(
+      "SELECT id FROM users WHERE email = $1 AND role = 'admin'",
+      [data.email]
+    );
+
+    if (existingAdmin.rows.length > 0) {
+      throw new Error("Admin with this email already exists");
+    }
+
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(data.password, saltRounds);
+
+    const result = await pool.query(
+      `INSERT INTO users (email, password_hash, first_name, last_name, role)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id, email, first_name, last_name, role, is_active, created_at, updated_at`,
+      [data.email, passwordHash, data.first_name || null, data.last_name || null]
+    );
+
+    const user = result.rows[0];
+
+    const payload: AuthPayload = {
+      userId: user.id,
+      email: user.email,
+      role: user.role || "admin",
+    };
+
+    const token = generateToken(payload);
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        role: user.role,
+        is_active: user.is_active,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+      },
+      token,
+    };
+  }
+
   async login(data: LoginDto): Promise<{ user: Omit<User, "password_hash">; token: string }> {
     // Find user
     const result = await pool.query(

@@ -113,9 +113,9 @@ export async function initializeDatabase(): Promise<void> {
     // Password for default admin: admin123 (bcrypt hash: $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy)
     // TODO: In production, change default admin password immediately
 
-    console.log("✅ Database tables initialized successfully");
+    console.log("Database tables initialized successfully");
   } catch (error) {
-    console.error("❌ Error initializing database:", error);
+    console.error("Error initializing database:", error);
     throw error;
   }
 }

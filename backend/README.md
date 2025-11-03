@@ -191,12 +191,12 @@ NODE_ENV=development
 # Database Configuration
 DB_HOST=localhost
 DB_PORT=5432
-DB_USER=ticketing_user
-DB_PASSWORD=ticketing_pass
+DB_USER=postgres
+DB_PASSWORD=postgres
 DB_NAME=ticketing_db
 
 # Or use connection string
-DATABASE_URL=postgresql://ticketing_user:ticketing_pass@localhost:5432/ticketing_db
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ticketing_db
 ```
 
 **Note:** When running with Docker Compose, these variables are automatically set. You only need to configure them when running locally.
