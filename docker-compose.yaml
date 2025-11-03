@@ -137,6 +137,48 @@ services:
           cpus: '0.25'
           memory: 128M
 
+  # Frontend - React application served with nginx
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Build-time API URL - browser-accessible URL (since frontend runs in browser, not container)
+        # Note: Vite env vars are baked at build time, so this must be the URL the browser can reach
+        # Default: http://localhost:3000/api (assumes backend on same host at port 3000)
+        # For production with different host/port, override this build arg or use reverse proxy
+        VITE_API_BASE_URL: http://localhost:${BE_PORT}/api
+    container_name: ticketing-frontend
+    ports:
+      - "3001:80"
+    environment:
+      # Runtime environment (nginx serves static files, but included for reference)
+      - NODE_ENV=production
+    networks:
+      - ticketing-network
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    # Scalability: Stateless - can scale horizontally behind load balancer
+    # TODO: Add resource limits for production
+    # TODO: Configure CORS and security headers in nginx for production
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+
 volumes:
   postgres_data:
     # TODO: Configure backup strategy for production

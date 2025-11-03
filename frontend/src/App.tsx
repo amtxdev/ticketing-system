@@ -1,27 +1,42 @@
-import { useState } from 'react'
-import './App.css'
+// Main App Component
+// Sets up routing and provides authentication context to all pages
+
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { LoginPage } from './pages/LoginPage';
+import { EventsPage } from './pages/EventsPage';
+import { PurchasePage } from './pages/PurchasePage';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <div className="App">
-      <div>
-        <h1>Frontend React App</h1>
-      </div>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
-  )
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/events" element={<EventsPage />} />
+
+          {/* Protected routes - require authentication */}
+          <Route
+            path="/purchase/:eventId"
+            element={
+              <ProtectedRoute>
+                <PurchasePage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Default redirect to events page */}
+          <Route path="/" element={<Navigate to="/events" replace />} />
+
+          {/* 404 fallback */}
+          <Route path="*" element={<Navigate to="/events" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
 }
 
-export default App
+export default App;
