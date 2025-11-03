@@ -3,7 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { testConnection } from "./db/connection";
 import { initializeDatabase } from "./db/migrations";
-import { seedDefaultAdmin } from "./db/seed";
+import { seedAll } from "./db/seed";
 import ticketRoutes from "./routes/ticketRoutes";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
@@ -82,8 +82,8 @@ async function startServer() {
     // Initialize database tables
     await initializeDatabase();
 
-    // Seed default admin user
-    await seedDefaultAdmin();
+    // Seed database (admin, events, tickets)
+    await seedAll();
 
     // Start server
     app.listen(PORT, () => {

@@ -14,8 +14,8 @@ router.get("/:id", (req, res) => eventController.getEvent(req, res));
 // Create event - requires authentication (admin or user can create)
 router.post("/", authenticate, (req, res) => eventController.createEvent(req, res));
 
-// Update event - requires authentication (admin or creator can update)
-router.put("/:id", authenticate, (req, res) => eventController.updateEvent(req, res));
+// Update event - requires admin role
+router.put("/:id", authenticate, authorize("admin"), (req, res) => eventController.updateEvent(req, res));
 
 // Delete event - requires admin role
 router.delete("/:id", authenticate, authorize("admin"), (req, res) => eventController.deleteEvent(req, res));
