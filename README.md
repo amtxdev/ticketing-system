@@ -26,13 +26,14 @@ From the project root directory:
 ```bash
 docker compose up --build
 
-# View logs
+# View all services
 # Follow all logs in real-time
 docker compose logs -f
 
 # View last 100 lines of all services
 docker compose logs --tail=100
 
+# View Specific Service Logs
 # Backend logs (follow)
 docker compose logs -f backend
 
@@ -45,6 +46,7 @@ docker compose logs -f minio
 # MinIO init logs
 docker compose logs minio-init
 
+# Useful Log Commands
 # Show last 50 lines without following
 docker compose logs --tail=50 backend
 
@@ -57,6 +59,7 @@ docker compose logs --since 10m backend
 # Show logs from specific container (using container name)
 docker logs ticketing-backend -f
 
+# Direct Docker Container Logs
 # Backend container
 docker logs ticketing-backend -f
 
@@ -71,6 +74,7 @@ docker logs ticketing-backend --tail=100
 
 # Show with timestamps
 docker logs ticketing-backend -f -t
+
 
 # Stop the service
 docker compose down
