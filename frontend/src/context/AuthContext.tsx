@@ -43,10 +43,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         if (storedUser && storedToken) {
           setUser(storedUser);
+        } else {
+          // If no token/user in storage, ensure state is cleared
+          setUser(null);
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
         tokenStorage.removeToken();
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
@@ -61,8 +65,53 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
     window.addEventListener('auth:unauthorized', handleUnauthorized);
 
+    // Listen for storage changes (e.g., when localStorage is cleared in another tab)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'auth_token' || e.key === 'auth_user' || e.key === null) {
+        // localStorage was cleared or auth data was modified
+        const storedToken = tokenStorage.getToken();
+        const storedUser = tokenStorage.getUser();
+        
+        if (!storedToken || !storedUser) {
+          setUser(null);
+        } else {
+          setUser(storedUser);
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
     return () => {
       window.removeEventListener('auth:unauthorized', handleUnauthorized);
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
+  // Periodically check if token still exists in localStorage
+  // This catches cases where localStorage is cleared in the same tab
+  // (storage event only fires for cross-tab changes)
+  useEffect(() => {
+    const checkAuthState = () => {
+      const storedToken = tokenStorage.getToken();
+      const storedUser = tokenStorage.getUser();
+      
+      if (!storedToken || !storedUser) {
+        // Use functional update to avoid dependency issues
+        setUser((currentUser) => {
+          if (currentUser !== null) {
+            // Token was cleared but state still has user
+            return null;
+          }
+          return currentUser;
+        });
+      }
+    };
+
+    // Check every 1 second (for same-tab localStorage clearing)
+    const intervalId = setInterval(checkAuthState, 1000);
+
+    return () => {
+      clearInterval(intervalId);
     };
   }, []);
 
