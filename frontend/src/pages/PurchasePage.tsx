@@ -294,7 +294,7 @@ export const PurchasePage: React.FC = () => {
             backgroundClip: 'text',
             fontWeight: '700',
             fontSize: '1.1rem'
-          }}>${(typeof event.price === 'number' ? event.price : Number(event.price) || 0).toFixed(2)}</span>
+          }}>Rp.{(typeof event.price === 'number' ? event.price : Number(event.price) || 0).toFixed(2)}</span>
         </div>
       </div>
 
@@ -369,7 +369,7 @@ export const PurchasePage: React.FC = () => {
               backgroundClip: 'text',
               fontSize: '1.5rem',
               fontWeight: '700'
-            }}>${totalPrice.toFixed(2)}</strong>
+            }}>Rp.{totalPrice.toFixed(2)}</strong>
           </div>
         </div>
 

@@ -157,7 +157,7 @@ export async function seedEvents(): Promise<void> {
     }
 
     // Set dates to 2025
-    const baseDate = new Date('2025-01-15');
+    const baseDate = new Date('2025-12-30');
     const tomorrow = new Date(baseDate);
     tomorrow.setDate(tomorrow.getDate() + 1);
 

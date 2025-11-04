@@ -66,7 +66,7 @@ export const EventsPage: React.FC = () => {
               <span style={{ 
                 color: '#4b5563',
                 fontWeight: '500'
-              }}>Welcome, {user?.first_name} ({user?.role})</span>
+              }}>Welcome, {user?.first_name} {user?.last_name}</span>
               {isAdmin() && (
                 <span style={{ 
                   padding: '0.5rem 1rem', 
@@ -281,7 +281,7 @@ export const EventsPage: React.FC = () => {
                         WebkitTextFillColor: 'transparent',
                         backgroundClip: 'text',
                         fontWeight: '700'
-                      }}>${(typeof event.price === 'number' ? event.price : Number(event.price) || 0).toFixed(2)}</span>
+                      }}>Rp.{(typeof event.price === 'number' ? event.price : Number(event.price) || 0).toFixed(2)}</span>
                     </p>
                     <p style={{ margin: '0.5rem 0' }}>
                       <strong style={{ color: '#1f2937' }}>Available:</strong> {event.available_tickets} / {event.total_capacity}
