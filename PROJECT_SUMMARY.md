@@ -93,13 +93,13 @@ The **Ticketing System** is a comprehensive event management and ticket purchasi
 ### High-Level Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        Client Layer                         │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐    │
-│  │   Frontend   │  │   Frontend   │  │   Mobile/    │    │
-│  │  Instance 1  │  │  Instance 2  │  │   API Users  │    │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘    │
-└─────────┼──────────────────┼──────────────────┼───────────┘
+┌────────────────────────────────────────────────────────────┐
+│                        Client Layer                        │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │   Frontend   │  │   Frontend   │  │   Mobile/    │      │
+│  │  Instance 1  │  │  Instance 2  │  │   API Users  │      │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘      │
+└─────────┼──────────────────┼──────────────────┼────────────┘
           │                  │                  │
           └──────────────────┼──────────────────┘
                              │
@@ -110,10 +110,10 @@ The **Ticketing System** is a comprehensive event management and ticket purchasi
                              │
           ┌──────────────────▼──────────────────┐
           │        Application Layer            │
-          │  ┌──────────────┐  ┌──────────────┐│
-          │  │  Backend API │  │  Backend API ││
-          │  │  Instance 1  │  │  Instance 2  ││
-          │  └──────┬───────┘  └──────┬───────┘│
+          │  ┌──────────────┐  ┌──────────────┐ │
+          │  │  Backend API │  │  Backend API │ │
+          │  │  Instance 1  │  │  Instance 2  │ │
+          │  └──────┬───────┘  └──────┬───────┘ │
           └─────────┼──────────────────┼────────┘
                     │                  │
                     └──────────────────┘
@@ -123,8 +123,8 @@ The **Ticketing System** is a comprehensive event management and ticket purchasi
           │         Port: 3000                  │
           └──────────────────┬──────────────────┘
                              │
-          ┌──────────────────▼──────────────────┐
-          │         Data Layer                  │
+          ┌──────────────────▼─────────────────┐
+          │         Data Layer                 │
           │  ┌──────────────────────────────┐  │
           │  │   PostgreSQL Database        │  │
           │  │   - Users                    │  │

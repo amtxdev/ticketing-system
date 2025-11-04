@@ -40,9 +40,9 @@ Safely stops containers while preserving database volumes.
 ```
 
 **What it does:**
-- ✓ Stops all containers
-- ✓ Removes containers and networks
-- ✗ **KEEPS volumes** (database data is preserved)
+- Stops all containers
+- Removes containers and networks
+- **KEEPS volumes** (database data is preserved)
 
 **Equivalent to:** `docker compose down` (without `-v` flag)
 
@@ -63,13 +63,13 @@ docker compose restart
 
 ### Dangerous Commands (Data Lost)
 ```bash
-# ⚠️ WARNING: Removes volumes (deletes database!)
+# WARNING: Removes volumes (deletes database!)
 docker compose down -v
 
-# ⚠️ WARNING: Removes specific volume
+# WARNING: Removes specific volume
 docker volume rm project-scaffolding_postgres_data
 
-# ⚠️ WARNING: Removes all unused volumes
+# WARNING: Removes all unused volumes
 docker volume prune
 ```
 

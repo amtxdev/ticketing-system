@@ -7,7 +7,7 @@
 3. Select `Ticketing-System-API.postman_collection.json`
 4. The collection will be imported with all endpoints organized by category
 
-## 🔧 Configuration
+## Configuration
 
 ### Collection Variables
 
@@ -30,7 +30,7 @@ The collection uses the following variables (automatically set or can be configu
    - Add `admin_registration_secret` variable value
    - Or set `ADMIN_REGISTRATION_SECRET` environment variable
 
-## 📋 API Endpoints
+## API Endpoints
 
 ### 1. Health & Info
 - **GET** `/health` - Health check
@@ -66,7 +66,7 @@ All ticket endpoints require authentication:
 - **PUT** `/api/tickets/:id` - Update ticket (admin only)
 - **DELETE** `/api/tickets/:id` - Delete ticket (admin only)
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Step 1: Login
 1. Use **Login** request in Authentication folder
@@ -82,7 +82,7 @@ All ticket endpoints require authentication:
 - Events list and details are public (no auth needed)
 - Try listing events without logging in
 
-## 📝 Example Usage Flow
+## Example Usage Flow
 
 1. **Register a user**:
    ```
@@ -116,20 +116,20 @@ All ticket endpoints require authentication:
    → Shows only your tickets
    ```
 
-## 🔐 Authentication
+## Authentication
 
 - Most endpoints require JWT token in `Authorization` header
 - Format: `Bearer <token>`
 - Token is automatically added after login via collection variable
 - Public endpoints: Health check, Root, Events list/details
 
-## 🎯 Role-Based Access
+## Role-Based Access
 
 - **Public**: Anyone can access
 - **User**: Authenticated users can access
 - **Admin**: Only admins can access
 
-## 📊 Response Formats
+## Response Formats
 
 All endpoints return JSON with consistent structure:
 
@@ -150,12 +150,12 @@ All endpoints return JSON with consistent structure:
 }
 ```
 
-## ⚠️ Rate Limiting
+## Rate Limiting
 
 - **General API**: 100 requests per 15 minutes per IP
 - **Auth endpoints**: 5 requests per 15 minutes per IP (stricter)
 
-## 🧪 Testing Tips
+## Testing Tips
 
 1. **Start with public endpoints** (events list) to verify API is running
 2. **Register a user** before testing authenticated endpoints
@@ -164,7 +164,7 @@ All endpoints return JSON with consistent structure:
    - Default admin: `admin@example.com` / `admin123`
 5. **Test authorization** by trying to access admin endpoints with regular user
 
-## 📦 Collection Structure
+## Collection Structure
 
 ```
 Ticketing System API
@@ -197,7 +197,7 @@ Ticketing System API
     └── Delete Ticket (admin)
 ```
 
-## 🔄 Updating Variables
+## Updating Variables
 
 After login, these variables are automatically set:
 - `auth_token` - Your JWT token
