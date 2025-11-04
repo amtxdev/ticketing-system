@@ -16,6 +16,7 @@ const normalizeEvent = (event: any): Event => {
     price: Number(event.price),
     total_capacity: Number(event.total_capacity) || Number(event.total_tickets),
     available_tickets: Number(event.available_tickets),
+    location: event.location || event.venue, // Map venue to location
   };
 };
 
@@ -119,6 +120,79 @@ export const eventService = {
       
       // Normalize ticket to ensure numeric fields are numbers
       return normalizeTicket(ticket);
+    } catch (error: any) {
+      throw error as ApiError;
+    }
+  },
+
+  /**
+   * Create a new event (admin only)
+   */
+  createEvent: async (eventData: Partial<Event>): Promise<Event> => {
+    try {
+      const response = await apiClient.post<{ data?: Event; event?: Event } | Event>(
+        API_ENDPOINTS.events.create,
+        eventData
+      );
+      const data = response.data;
+      let event: any;
+      
+      // Handle different response shapes
+      if (typeof data === 'object' && data !== null) {
+        if ('data' in data && data.data) {
+          event = data.data;
+        } else if ('event' in data && data.event) {
+          event = data.event;
+        } else {
+          event = data;
+        }
+      } else {
+        event = data;
+      }
+      
+      return normalizeEvent(event);
+    } catch (error: any) {
+      throw error as ApiError;
+    }
+  },
+
+  /**
+   * Update an event (admin only)
+   */
+  updateEvent: async (id: number, eventData: Partial<Event>): Promise<Event> => {
+    try {
+      const response = await apiClient.put<{ data?: Event; event?: Event } | Event>(
+        API_ENDPOINTS.events.update(id),
+        eventData
+      );
+      const data = response.data;
+      let event: any;
+      
+      // Handle different response shapes
+      if (typeof data === 'object' && data !== null) {
+        if ('data' in data && data.data) {
+          event = data.data;
+        } else if ('event' in data && data.event) {
+          event = data.event;
+        } else {
+          event = data;
+        }
+      } else {
+        event = data;
+      }
+      
+      return normalizeEvent(event);
+    } catch (error: any) {
+      throw error as ApiError;
+    }
+  },
+
+  /**
+   * Delete an event (admin only)
+   */
+  deleteEvent: async (id: number): Promise<void> => {
+    try {
+      await apiClient.delete(API_ENDPOINTS.events.delete(id));
     } catch (error: any) {
       throw error as ApiError;
     }

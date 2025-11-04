@@ -13,6 +13,9 @@ export const API_ENDPOINTS = {
     list: `${API_BASE_URL}/events`,
     getById: (id: number) => `${API_BASE_URL}/events/${id}`,
     purchase: (eventId: number) => `${API_BASE_URL}/events/${eventId}/purchase`,
+    create: `${API_BASE_URL}/events`,
+    update: (id: number) => `${API_BASE_URL}/events/${id}`,
+    delete: (id: number) => `${API_BASE_URL}/events/${id}`,
   },
 } as const;
 

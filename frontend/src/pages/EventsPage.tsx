@@ -4,7 +4,7 @@
 // Demonstrates API integration and access control UI
 
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { eventService } from '../services/eventService';
 import { Event, ApiError } from '../types';
@@ -14,6 +14,7 @@ export const EventsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const navigate = useNavigate();
   const { isAuthenticated, user, logout, isAdmin } = useAuth();
 
   useEffect(() => {
@@ -68,17 +69,44 @@ export const EventsPage: React.FC = () => {
                 fontWeight: '500'
               }}>Welcome, {user?.first_name} {user?.last_name}</span>
               {isAdmin() && (
-                <span style={{ 
-                  padding: '0.5rem 1rem', 
-                  background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', 
-                  color: 'white',
-                  borderRadius: '12px',
-                  fontSize: '0.85rem',
-                  fontWeight: '600',
-                  boxShadow: '0 4px 15px rgba(245, 158, 11, 0.4)'
-                }}>
-                  Admin
-                </span>
+                <>
+                  <span style={{ 
+                    padding: '0.5rem 1rem', 
+                    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', 
+                    color: 'white',
+                    borderRadius: '12px',
+                    fontSize: '0.85rem',
+                    fontWeight: '600',
+                    boxShadow: '0 4px 15px rgba(245, 158, 11, 0.4)'
+                  }}>
+                    Admin
+                  </span>
+                  <button 
+                    onClick={() => navigate('/admin/events')}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '12px',
+                      cursor: 'pointer',
+                      fontWeight: '600',
+                      fontSize: '0.85rem',
+                      boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.6)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4)';
+                    }}
+                  >
+                    Manage Events
+                  </button>
+                </>
               )}
               <button onClick={logout} style={{
                 padding: '0.5rem 1rem',

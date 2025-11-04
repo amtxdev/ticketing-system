@@ -7,6 +7,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { LoginPage } from './pages/LoginPage';
 import { EventsPage } from './pages/EventsPage';
 import { PurchasePage } from './pages/PurchasePage';
+import { AdminEventsPage } from './pages/AdminEventsPage';
 import './App.css';
 
 function App() {
@@ -24,6 +25,16 @@ function App() {
             element={
               <ProtectedRoute>
                 <PurchasePage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Admin routes - require admin role */}
+          <Route
+            path="/admin/events"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminEventsPage />
               </ProtectedRoute>
             }
           />
