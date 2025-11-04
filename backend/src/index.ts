@@ -82,7 +82,7 @@ async function startServer() {
     // Initialize database tables
     await initializeDatabase();
 
-    // Seed database (admin, events, tickets)
+    // Seed database (admin, users, events, tickets)
     await seedAll();
 
     // Start server

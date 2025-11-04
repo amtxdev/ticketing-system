@@ -74,18 +74,17 @@ services:
     profiles:
       - init
 
-  # Backend API - Stateless, scalable
-  backend:
+  # Backend API Instance 1 - With Nginx reverse proxy
+  backend-1:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: ticketing-backend
-    ports:
-      - ${BE_PORT}:${BE_PORT}
+    container_name: ticketing-backend-1
+    # No external ports - accessed via load balancer
     environment:
       - NODE_ENV=production
-      - PORT=${BE_PORT}
-      - BE_PORT=${BE_PORT}
+      - PORT=3000
+      - BE_PORT=3000
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
@@ -104,7 +103,6 @@ services:
       - MINIO_SECRET_KEY=minioadmin
       - MINIO_BUCKET_EVENTS=event-images
       - MINIO_USE_SSL=false
-      # TODO: Use secrets management (Docker secrets, AWS Secrets Manager, etc.)
     volumes:
       # For development, mount source code
       - ./backend/src:/app/src
@@ -117,18 +115,12 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-    # Scalability: Stateless design - can scale horizontally
-    # TODO: Add load balancer (nginx, traefik) in front of multiple backend instances
-    # TODO: Configure resource limits (memory, CPU) for production
     deploy:
-      # Docker Swarm/Kubernetes style configuration (for production)
-      replicas: 1
-      # TODO: Increase replicas and add load balancer for horizontal scaling
       resources:
         limits:
           cpus: '1'
@@ -137,8 +129,93 @@ services:
           cpus: '0.25'
           memory: 128M
 
-  # Frontend - React application served with nginx
-  frontend:
+  # Backend API Instance 2 - With Nginx reverse proxy (for load balancing)
+  backend-2:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ticketing-backend-2
+    # No external ports - accessed via load balancer
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - BE_PORT=3000
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES}
+      # Admin Credentials (for seeding)
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      # Object Storage Configuration
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_BUCKET_EVENTS=event-images
+      - MINIO_USE_SSL=false
+    volumes:
+      # For development, mount source code
+      - ./backend/src:/app/src
+    networks:
+      - ticketing-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+  # Nginx Load Balancer for Backend - Distributes requests across backend instances
+  nginx-lb-backend:
+    image: nginx:alpine
+    container_name: ticketing-nginx-lb-backend
+    ports:
+      - "${BE_PORT}:80"  # Expose load balancer on backend port
+      - "8080:8080"       # Health check port
+    volumes:
+      - ./infra/nginx-lb/backend-lb.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - ticketing-network
+    depends_on:
+      - backend-1
+      - backend-2
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+
+  # Frontend Instance 1 - React application served with nginx
+  frontend-1:
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -148,16 +225,15 @@ services:
         # Default: http://localhost:3000/api (assumes backend on same host at port 3000)
         # For production with different host/port, override this build arg or use reverse proxy
         VITE_API_BASE_URL: http://localhost:${BE_PORT}/api
-    container_name: ticketing-frontend
-    ports:
-      - "3001:80"
+    container_name: ticketing-frontend-1
+    # No external ports - accessed via load balancer
     environment:
       # Runtime environment (nginx serves static files, but included for reference)
       - NODE_ENV=production
     networks:
       - ticketing-network
     depends_on:
-      backend:
+      nginx-lb-backend:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
@@ -166,11 +242,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-    # Scalability: Stateless - can scale horizontally behind load balancer
-    # TODO: Add resource limits for production
-    # TODO: Configure CORS and security headers in nginx for production
     deploy:
-      replicas: 1
       resources:
         limits:
           cpus: '0.5'
@@ -179,11 +251,80 @@ services:
           cpus: '0.1'
           memory: 64M
 
+  # Frontend Instance 2 - React application served with nginx (for load balancing)
+  frontend-2:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:${BE_PORT}/api
+    container_name: ticketing-frontend-2
+    # No external ports - accessed via load balancer
+    environment:
+      - NODE_ENV=production
+    networks:
+      - ticketing-network
+    depends_on:
+      nginx-lb-backend:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+
+  # Nginx Load Balancer for Frontend - Distributes requests across frontend instances
+  nginx-lb-frontend:
+    image: nginx:alpine
+    container_name: ticketing-nginx-lb-frontend
+    ports:
+      - "3001:80"        # Expose load balancer on frontend port
+      - "8081:8080"      # Health check port
+    volumes:
+      - ./infra/nginx-lb/frontend-lb.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - ticketing-network
+    depends_on:
+      - frontend-1
+      - frontend-2
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+
 volumes:
   postgres_data:
+    # Persistent volume - data survives container removal
+    # To backup: ./scripts/backup-db.sh
+    # To restore: ./scripts/restore-db.sh <backup_file>
+    # WARNING: docker compose down -v will DELETE this volume!
+    # Use: docker compose down (without -v) to preserve data
     # TODO: Configure backup strategy for production
     # TODO: Use managed volume providers (EBS, persistent disks, etc.)
   minio_data:
+    # Persistent volume - data survives container removal
+    # WARNING: docker compose down -v will DELETE this volume!
     # TODO: Configure backup and lifecycle policies for object storage
 
 networks:

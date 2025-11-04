@@ -95,8 +95,23 @@ export const PurchasePage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <p>Loading event details...</p>
+      <div style={{ 
+        padding: '3rem', 
+        textAlign: 'center',
+        background: 'rgba(255, 255, 255, 0.9)',
+        borderRadius: '20px',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+        maxWidth: '600px',
+        margin: '2rem auto'
+      }}>
+        <p style={{ 
+          fontSize: '1.2rem',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+          fontWeight: '600'
+        }}>Loading event details...</p>
       </div>
     );
   }
@@ -105,21 +120,34 @@ export const PurchasePage: React.FC = () => {
     return (
       <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
         <div style={{ 
-          padding: '1rem', 
-          backgroundColor: '#fee',
-          color: '#c00',
-          borderRadius: '4px',
-          marginBottom: '1rem'
+          padding: '1.5rem', 
+          background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+          color: '#dc2626',
+          borderRadius: '16px',
+          marginBottom: '1.5rem',
+          border: '2px solid #fca5a5',
+          boxShadow: '0 4px 15px rgba(239, 68, 68, 0.2)'
         }}>
-          <p>{error}</p>
+          <p style={{ margin: 0, fontWeight: '500' }}>{error}</p>
         </div>
         <Link to="/events" style={{
-          padding: '0.5rem 1rem',
-          backgroundColor: '#007bff',
+          padding: '0.75rem 1.5rem',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           color: 'white',
           textDecoration: 'none',
-          borderRadius: '4px',
-          display: 'inline-block'
+          borderRadius: '12px',
+          display: 'inline-block',
+          fontWeight: '600',
+          boxShadow: '0 4px 15px rgba(99, 102, 241, 0.4)',
+          transition: 'all 0.3s ease'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.boxShadow = '0 6px 20px rgba(99, 102, 241, 0.6)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 4px 15px rgba(99, 102, 241, 0.4)';
         }}>
           Back to Events
         </Link>
@@ -131,27 +159,47 @@ export const PurchasePage: React.FC = () => {
     return (
       <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
         <div style={{ 
-          padding: '1.5rem', 
-          backgroundColor: '#d4edda',
-          border: '1px solid #c3e6cb',
-          borderRadius: '8px',
-          marginBottom: '1rem'
+          padding: '2rem', 
+          background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
+          border: '2px solid #10b981',
+          borderRadius: '20px',
+          marginBottom: '1.5rem',
+          boxShadow: '0 8px 32px rgba(16, 185, 129, 0.2)'
         }}>
-          <h2 style={{ color: '#155724', marginTop: 0 }}>Purchase Successful!</h2>
-          <p style={{ color: '#155724' }}>
+          <h2 style={{ 
+            background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            marginTop: 0,
+            fontSize: '2rem',
+            fontWeight: '700'
+          }}>🎉 Purchase Successful!</h2>
+          <p style={{ color: '#065f46', marginBottom: '0.5rem', fontWeight: '500' }}>
             Your tickets have been confirmed. Order ID: {purchaseSuccess.id}
           </p>
-          <p style={{ color: '#155724', fontSize: '0.9rem' }}>
-            Quantity: {purchaseSuccess.quantity} | Total: ${(typeof purchaseSuccess.total_price === 'number' ? purchaseSuccess.total_price : Number(purchaseSuccess.total_price) || 0).toFixed(2)}
+          <p style={{ color: '#065f46', fontSize: '0.9rem', margin: 0 }}>
+            Quantity: {purchaseSuccess.quantity} | Total: <strong>${(typeof purchaseSuccess.total_price === 'number' ? purchaseSuccess.total_price : Number(purchaseSuccess.total_price) || 0).toFixed(2)}</strong>
           </p>
         </div>
         <Link to="/events" style={{
           padding: '0.75rem 1.5rem',
-          backgroundColor: '#007bff',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           color: 'white',
           textDecoration: 'none',
-          borderRadius: '4px',
-          display: 'inline-block'
+          borderRadius: '12px',
+          display: 'inline-block',
+          fontWeight: '600',
+          boxShadow: '0 4px 15px rgba(99, 102, 241, 0.4)',
+          transition: 'all 0.3s ease'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.boxShadow = '0 6px 20px rgba(99, 102, 241, 0.6)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 4px 15px rgba(99, 102, 241, 0.4)';
         }}>
           Back to Events
         </Link>
@@ -168,41 +216,85 @@ export const PurchasePage: React.FC = () => {
   const maxQuantity = Math.min(event.available_tickets, 10); // Limit purchase to 10 tickets
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
+    <div style={{ 
+      padding: '2rem', 
+      maxWidth: '600px', 
+      margin: '0 auto',
+      background: 'rgba(255, 255, 255, 0.95)',
+      borderRadius: '20px',
+      boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
+      backdropFilter: 'blur(10px)'
+    }}>
       <Link to="/events" style={{
-        marginBottom: '1rem',
+        marginBottom: '1.5rem',
         display: 'inline-block',
-        color: '#007bff',
-        textDecoration: 'none'
+        color: '#6366f1',
+        textDecoration: 'none',
+        fontWeight: '600',
+        transition: 'all 0.3s ease'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.color = '#4f46e5';
+        e.currentTarget.style.transform = 'translateX(-4px)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.color = '#6366f1';
+        e.currentTarget.style.transform = 'translateX(0)';
       }}>
         ← Back to Events
       </Link>
 
-      <h1>{event.title}</h1>
+      <h1 style={{
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        backgroundClip: 'text',
+        marginBottom: '1rem',
+        fontSize: '2.5rem',
+        fontWeight: '700'
+      }}>{event.title}</h1>
       
       {event.description && (
-        <p style={{ color: '#666', marginBottom: '1.5rem' }}>{event.description}</p>
+        <p style={{ 
+          color: '#6b7280', 
+          marginBottom: '1.5rem',
+          lineHeight: '1.6'
+        }}>{event.description}</p>
       )}
 
       <div style={{ 
-        border: '1px solid #ddd', 
-        borderRadius: '8px', 
+        background: 'rgba(99, 102, 241, 0.05)',
+        border: '2px solid rgba(99, 102, 241, 0.1)', 
+        borderRadius: '16px', 
         padding: '1.5rem',
         marginBottom: '1.5rem'
       }}>
-        <div style={{ marginBottom: '1rem' }}>
-          <strong>Event Date:</strong> {new Date(event.event_date).toLocaleString()}
+        <div style={{ marginBottom: '1rem', color: '#4b5563' }}>
+          <strong style={{ color: '#1f2937' }}>Event Date:</strong> {new Date(event.event_date).toLocaleString()}
         </div>
         {event.location && (
-          <div style={{ marginBottom: '1rem' }}>
-            <strong>Location:</strong> {event.location}
+          <div style={{ marginBottom: '1rem', color: '#4b5563' }}>
+            <strong style={{ color: '#1f2937' }}>Location:</strong> {event.location}
           </div>
         )}
-        <div style={{ marginBottom: '1rem' }}>
-          <strong>Available Tickets:</strong> {event.available_tickets} / {event.total_capacity}
+        <div style={{ marginBottom: '1rem', color: '#4b5563' }}>
+          <strong style={{ color: '#1f2937' }}>Available Tickets:</strong> {event.available_tickets} / {event.total_capacity}
         </div>
-        <div style={{ marginBottom: '1rem' }}>
-          <strong>Price per Ticket:</strong> ${(typeof event.price === 'number' ? event.price : Number(event.price) || 0).toFixed(2)}
+        <div style={{ marginBottom: 0, color: '#4b5563' }}>
+          <strong style={{ 
+            color: '#1f2937',
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>Price per Ticket:</strong> <span style={{
+            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            fontWeight: '700',
+            fontSize: '1.1rem'
+          }}>${(typeof event.price === 'number' ? event.price : Number(event.price) || 0).toFixed(2)}</span>
         </div>
       </div>
 
@@ -210,9 +302,11 @@ export const PurchasePage: React.FC = () => {
         <div style={{ 
           padding: '1rem', 
           marginBottom: '1rem', 
-          backgroundColor: '#fee',
-          color: '#c00',
-          borderRadius: '4px'
+          background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+          color: '#dc2626',
+          borderRadius: '12px',
+          border: '2px solid #fca5a5',
+          fontWeight: '500'
         }}>
           {error}
         </div>
@@ -220,7 +314,12 @@ export const PurchasePage: React.FC = () => {
 
       <form onSubmit={handlePurchase}>
         <div style={{ marginBottom: '1.5rem' }}>
-          <label htmlFor="quantity" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+          <label htmlFor="quantity" style={{ 
+            display: 'block', 
+            marginBottom: '0.5rem', 
+            fontWeight: '600',
+            color: '#1f2937'
+          }}>
             Quantity
           </label>
           <input
@@ -233,28 +332,45 @@ export const PurchasePage: React.FC = () => {
             required
             style={{ 
               width: '100px', 
-              padding: '0.5rem',
+              padding: '0.75rem',
               fontSize: '1rem',
-              border: '1px solid #ccc',
-              borderRadius: '4px'
+              border: '2px solid #e5e7eb',
+              borderRadius: '12px',
+              transition: 'all 0.3s ease',
+              boxSizing: 'border-box'
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = '#6366f1';
+              e.target.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = '#e5e7eb';
+              e.target.style.boxShadow = 'none';
             }}
           />
-          <span style={{ marginLeft: '0.5rem', color: '#666' }}>
+          <span style={{ marginLeft: '0.5rem', color: '#6b7280', fontWeight: '500' }}>
             (Max: {maxQuantity} tickets)
           </span>
         </div>
 
         <div style={{ 
-          padding: '1rem', 
-          backgroundColor: '#f8f9fa', 
-          borderRadius: '4px',
-          marginBottom: '1.5rem'
+          padding: '1.5rem', 
+          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%)', 
+          borderRadius: '16px',
+          marginBottom: '1.5rem',
+          border: '2px solid rgba(99, 102, 241, 0.2)'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-            <span>Subtotal ({quantity} tickets):</span>
-            <strong>${totalPrice.toFixed(2)}</strong>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ color: '#4b5563', fontWeight: '500' }}>Subtotal ({quantity} tickets):</span>
+            <strong style={{
+              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              fontSize: '1.5rem',
+              fontWeight: '700'
+            }}>${totalPrice.toFixed(2)}</strong>
           </div>
-          {/* Stub: Additional fees could be calculated here */}
         </div>
 
         <button
@@ -264,20 +380,39 @@ export const PurchasePage: React.FC = () => {
             width: '100%',
             padding: '1rem',
             fontSize: '1.1rem',
-            backgroundColor: event.available_tickets === 0 ? '#ccc' : '#28a745',
+            background: (isPurchasing || event.available_tickets === 0 || quantity < 1)
+              ? 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)'
+              : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
             color: 'white',
             border: 'none',
-            borderRadius: '4px',
+            borderRadius: '12px',
             cursor: (isPurchasing || event.available_tickets === 0 || quantity < 1) ? 'not-allowed' : 'pointer',
-            opacity: (isPurchasing || event.available_tickets === 0 || quantity < 1) ? 0.6 : 1
+            opacity: (isPurchasing || event.available_tickets === 0 || quantity < 1) ? 0.7 : 1,
+            fontWeight: '600',
+            boxShadow: (isPurchasing || event.available_tickets === 0 || quantity < 1)
+              ? 'none'
+              : '0 4px 15px rgba(16, 185, 129, 0.4)',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={(e) => {
+            if (!isPurchasing && event.available_tickets > 0 && quantity >= 1) {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(16, 185, 129, 0.6)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = (isPurchasing || event.available_tickets === 0 || quantity < 1)
+              ? 'none'
+              : '0 4px 15px rgba(16, 185, 129, 0.4)';
           }}
         >
           {isPurchasing ? 'Processing...' : event.available_tickets === 0 ? 'Sold Out' : `Purchase ${quantity} Ticket${quantity > 1 ? 's' : ''}`}
         </button>
       </form>
 
-      <div style={{ marginTop: '1rem', fontSize: '0.9rem', color: '#666' }}>
-        <p>Purchasing as: <strong>{user?.email}</strong></p>
+      <div style={{ marginTop: '1.5rem', fontSize: '0.9rem', color: '#6b7280', textAlign: 'center' }}>
+        <p>Purchasing as: <strong style={{ color: '#6366f1' }}>{user?.email}</strong></p>
       </div>
     </div>
   );

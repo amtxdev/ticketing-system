@@ -2,3 +2,8 @@ dist/
 node_modules/
 .env
 !.env.example
+
+# Database backups
+backups/*.sql.gz
+backups/*.sql
+!backups/README.md
