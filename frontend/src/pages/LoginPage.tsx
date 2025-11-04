@@ -5,12 +5,14 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { validateEmail } from '../utils/validation';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -27,17 +29,32 @@ export const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setEmailError(null);
+
+    // Client-side validation
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.valid) {
+      setEmailError(emailValidation.message || 'Invalid email');
+      return;
+    }
+
+    if (!password || password.trim().length === 0) {
+      setError('Password is required');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       // Call auth service to login
       // This will store the token via the auth context
-      await login({ email, password });
+      await login({ email: email.toLowerCase().trim(), password });
 
       // Redirect to intended page or events list
       const from = (location.state as any)?.from?.pathname || '/events';
       navigate(from, { replace: true });
     } catch (err: any) {
+      // Don't expose detailed error messages to prevent information leakage
       setError(err.message || 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
@@ -92,26 +109,45 @@ export const LoginPage: React.FC = () => {
             id="email"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setEmailError(null);
+            }}
+            onBlur={(e) => {
+              const validation = validateEmail(e.target.value);
+              if (!validation.valid && e.target.value.trim().length > 0) {
+                setEmailError(validation.message || 'Invalid email');
+              } else {
+                setEmailError(null);
+              }
+            }}
             required
             style={{ 
               width: '100%', 
               padding: '0.75rem',
               fontSize: '1rem',
-              border: '2px solid #e5e7eb',
+              border: emailError ? '2px solid #dc2626' : '2px solid #e5e7eb',
               borderRadius: '12px',
               transition: 'all 0.3s ease',
               boxSizing: 'border-box'
             }}
             onFocus={(e) => {
-              e.target.style.borderColor = '#6366f1';
-              e.target.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
+              e.target.style.borderColor = emailError ? '#dc2626' : '#6366f1';
+              e.target.style.boxShadow = emailError 
+                ? '0 0 0 3px rgba(220, 38, 38, 0.1)' 
+                : '0 0 0 3px rgba(99, 102, 241, 0.1)';
             }}
-            onBlur={(e) => {
-              e.target.style.borderColor = '#e5e7eb';
-              e.target.style.boxShadow = 'none';
-            }}
+            autoComplete="email"
           />
+          {emailError && (
+            <div style={{ 
+              marginTop: '0.5rem', 
+              color: '#dc2626', 
+              fontSize: '0.875rem' 
+            }}>
+              {emailError}
+            </div>
+          )}
         </div>
 
         <div style={{ marginBottom: '1.5rem' }}>
@@ -146,6 +182,7 @@ export const LoginPage: React.FC = () => {
               e.target.style.borderColor = '#e5e7eb';
               e.target.style.boxShadow = 'none';
             }}
+            autoComplete="current-password"
           />
         </div>
 

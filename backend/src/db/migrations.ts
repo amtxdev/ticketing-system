@@ -57,15 +57,47 @@ export async function initializeDatabase(): Promise<void> {
       )
     `);
 
-    // Create sessions table for token management (optional, for token blacklisting)
+    // Create sessions table for token management and blacklisting
     await pool.query(`
       CREATE TABLE IF NOT EXISTS sessions (
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-        token_hash VARCHAR(255) NOT NULL,
+        token_hash TEXT NOT NULL,
         expires_at TIMESTAMP NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        is_revoked BOOLEAN DEFAULT false,
+        revoked_at TIMESTAMP,
+        device_info TEXT,
+        ip_address VARCHAR(45),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        last_used_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
+    `);
+
+    // Add missing columns to sessions table if they don't exist (for existing tables)
+    await pool.query(`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                      WHERE table_name='sessions' AND column_name='is_revoked') THEN
+          ALTER TABLE sessions ADD COLUMN is_revoked BOOLEAN DEFAULT false;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                      WHERE table_name='sessions' AND column_name='revoked_at') THEN
+          ALTER TABLE sessions ADD COLUMN revoked_at TIMESTAMP;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                      WHERE table_name='sessions' AND column_name='device_info') THEN
+          ALTER TABLE sessions ADD COLUMN device_info TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                      WHERE table_name='sessions' AND column_name='ip_address') THEN
+          ALTER TABLE sessions ADD COLUMN ip_address VARCHAR(45);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                      WHERE table_name='sessions' AND column_name='last_used_at') THEN
+          ALTER TABLE sessions ADD COLUMN last_used_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+        END IF;
+      END $$;
     `);
 
     // Create indexes for performance
@@ -107,6 +139,18 @@ export async function initializeDatabase(): Promise<void> {
 
     await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)
+    `);
+
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_sessions_token_hash ON sessions(token_hash)
+    `);
+
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_sessions_is_revoked ON sessions(is_revoked)
+    `);
+
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_sessions_user_id_revoked ON sessions(user_id, is_revoked)
     `);
 
     // Note: Default admin user will be created on first run via a separate script

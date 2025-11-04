@@ -26,11 +26,6 @@ docker compose logs -f backend
 # PostgreSQL logs
 docker compose logs -f postgres
 
-# MinIO logs
-docker compose logs -f minio
-
-# MinIO init logs
-docker compose logs minio-init
 
 # Show last 50 lines without following
 docker compose logs --tail=50 backend
@@ -50,8 +45,6 @@ docker logs ticketing-backend -f
 # PostgreSQL container
 docker logs ticketing-postgres -f
 
-# MinIO container
-docker logs ticketing-minio -f
 
 # Show last 100 lines
 docker logs ticketing-backend --tail=100

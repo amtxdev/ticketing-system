@@ -24,6 +24,9 @@ See each subdirectory's `README.md` for details on expectations and placeholders
 
 From the project root directory:
 ```bash
+
+docker compose up --build --force-recreate
+
 docker compose up --build
 
 # View all services
@@ -40,11 +43,6 @@ docker compose logs -f backend
 # PostgreSQL logs
 docker compose logs -f postgres
 
-# MinIO logs
-docker compose logs -f minio
-
-# MinIO init logs
-docker compose logs minio-init
 
 # Useful Log Commands
 # Show last 50 lines without following
@@ -66,8 +64,6 @@ docker logs ticketing-backend -f
 # PostgreSQL container
 docker logs ticketing-postgres -f
 
-# MinIO container
-docker logs ticketing-minio -f
 
 # Show last 100 lines
 docker logs ticketing-backend --tail=100

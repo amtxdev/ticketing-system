@@ -32,6 +32,13 @@ export class TicketService {
     const values: any[] = [];
     let paramIndex = 1;
 
+    // Filter by user_id if provided (for non-admin users)
+    if (params.user_id) {
+      conditions.push(`user_id = $${paramIndex}`);
+      values.push(params.user_id);
+      paramIndex++;
+    }
+
     if (params.status) {
       conditions.push(`status = $${paramIndex}`);
       values.push(params.status);

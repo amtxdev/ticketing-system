@@ -93,8 +93,7 @@ req.user = {
 
 **Services Provisioned:**
 1. **PostgreSQL Database** - Managed with health checks
-2. **MinIO Object Storage** - S3-compatible storage for assets
-3. **Backend API** - Stateless, scalable Node.js service
+2. **Backend API** - Stateless, scalable Node.js service
 
 **Provisioning Scripts:**
 - `infra/provision.sh` - Automated provisioning with security and scalability considerations
@@ -205,10 +204,6 @@ docker-compose.yaml              # Multi-service orchestration
    - Indexed queries
    - Transaction support for atomic operations
 
-4. **Object Storage:**
-   - S3-compatible MinIO
-   - Ready for cloud storage migration
-   - Distributed mode support
 
 ## 🔧 API Endpoints Summary
 
@@ -255,11 +250,6 @@ cd ..
 docker-compose up -d
 ```
 
-### 3. Initialize Storage
-
-```bash
-docker-compose --profile init up minio-init
-```
 
 ### 4. Test APIs
 
@@ -321,9 +311,8 @@ curl http://localhost:3000/api/events
 
 1. **JWT over Sessions:** Chosen for stateless scalability
 2. **PostgreSQL:** Robust, feature-rich, supports complex queries
-3. **MinIO:** S3-compatible, easy migration to cloud storage
-4. **Docker Compose:** Local development, production patterns in scripts
-5. **TypeScript:** Type safety, better developer experience
+3. **Docker Compose:** Local development, production patterns in scripts
+4. **TypeScript:** Type safety, better developer experience
 
 ### Extensibility Points
 

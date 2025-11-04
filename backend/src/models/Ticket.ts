@@ -1,9 +1,15 @@
 export interface Ticket {
   id?: number;
+  event_id?: number;
+  user_id?: number;
   title: string;
   description?: string;
-  status?: "open" | "in_progress" | "resolved" | "closed";
+  status?: "open" | "in_progress" | "resolved" | "closed" | "purchased" | "cancelled";
   priority?: "low" | "medium" | "high" | "urgent";
+  ticket_type?: "support" | "event";
+  quantity?: number;
+  purchase_price?: number;
+  purchase_date?: Date;
   created_by?: string;
   assigned_to?: string;
   created_at?: Date;
@@ -27,6 +33,7 @@ export interface UpdateTicketDto {
 }
 
 export interface TicketQueryParams {
+  user_id?: number;
   status?: string;
   priority?: string;
   created_by?: string;

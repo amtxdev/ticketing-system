@@ -35,6 +35,8 @@ export class TicketController {
   async getTicket(req: Request, res: Response): Promise<void> {
     try {
       const id = parseInt(req.params.id, 10);
+      const userId = req.user?.userId;
+      const userRole = req.user?.role;
 
       if (isNaN(id)) {
         res.status(400).json({
@@ -54,6 +56,15 @@ export class TicketController {
         return;
       }
 
+      // Authorization check: Users can only view their own tickets, admins can view any
+      if (userRole !== "admin" && ticket.user_id !== userId) {
+        res.status(403).json({
+          error: "Forbidden",
+          message: "You can only view your own tickets",
+        });
+        return;
+      }
+
       res.status(200).json({
         message: "Ticket retrieved successfully",
         data: ticket,
@@ -69,6 +80,9 @@ export class TicketController {
 
   async listTickets(req: Request, res: Response): Promise<void> {
     try {
+      const userId = req.user?.userId;
+      const userRole = req.user?.role;
+
       const params: TicketQueryParams = {
         status: req.query.status as string,
         priority: req.query.priority as string,
@@ -77,6 +91,11 @@ export class TicketController {
         limit: req.query.limit ? parseInt(req.query.limit as string, 10) : undefined,
         offset: req.query.offset ? parseInt(req.query.offset as string, 10) : undefined,
       };
+
+      // If user is not admin, filter to only show their tickets
+      if (userRole !== "admin") {
+        params.user_id = userId;
+      }
 
       const result = await ticketService.listTickets(params);
 

@@ -143,9 +143,6 @@ JWT_EXPIRES_IN=7d
 # Database Configuration
 DB_PASSWORD=$DB_PASSWORD
 
-# MinIO Configuration
-MINIO_ROOT_USER=minioadmin
-MINIO_ROOT_PASSWORD=$(openssl rand -base64 24)
 
 # Environment
 NODE_ENV=$ENVIRONMENT
@@ -224,8 +221,7 @@ provision_storage() {
         return
     fi
     
-    # MinIO will be provisioned by docker-compose
-    log_info "Object storage will be provisioned by docker-compose (MinIO)"
+    log_info "Object storage not configured for local development"
     
     log_success "Object storage provisioning configured"
     
@@ -359,7 +355,6 @@ main() {
     log_info "Next steps:"
     log_info "  1. Review generated .env file"
     log_info "  2. Start services: docker-compose up -d"
-    log_info "  3. Initialize MinIO buckets: docker-compose --profile init up minio-init"
     log_info "  4. Check health: curl http://localhost:3000/health"
     log_info ""
 }

@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
 import { AuthService } from "../services/authService";
 import { RegisterDto, LoginDto } from "../models/User";
+import {
+  validateAndSanitizeEmail,
+  validateStringLength,
+  isValidPassword,
+} from "../utils/validation";
 
 const authService = new AuthService();
 
@@ -9,41 +14,53 @@ export class AuthController {
     try {
       const data: RegisterDto = req.body;
 
-
-      // Validation
-      if (!data.email || !data.email.trim()) {
+      // Validate and sanitize email
+      const emailValidation = validateAndSanitizeEmail(data.email);
+      if (!emailValidation.valid) {
         res.status(400).json({
           error: "Validation error",
-          message: "Email is required",
+          message: emailValidation.message || "Invalid email",
         });
         return;
       }
 
-      if (!data.password || data.password.length < 6) {
+      // Validate password
+      const passwordValidation = isValidPassword(data.password);
+      if (!passwordValidation.valid) {
         res.status(400).json({
           error: "Validation error",
-          message: "Password must be at least 6 characters",
+          message: passwordValidation.message || "Invalid password",
         });
         return;
       }
 
-      if (!data.first_name || !data.first_name.trim()) {
+      // Validate first name
+      const firstNameValidation = validateStringLength(data.first_name, 1, 100, "First name");
+      if (!firstNameValidation.valid) {
         res.status(400).json({
           error: "Validation error",
-          message: "First name is required",
+          message: firstNameValidation.message,
         });
         return;
       }
 
-      if (!data.last_name || !data.last_name.trim()) {
+      // Validate last name
+      const lastNameValidation = validateStringLength(data.last_name, 1, 100, "Last name");
+      if (!lastNameValidation.valid) {
         res.status(400).json({
           error: "Validation error",
-          message: "Last name is required",
+          message: lastNameValidation.message,
         });
         return;
       }
 
-      const result = await authService.register(data);
+      // Use sanitized email
+      const sanitizedData: RegisterDto = {
+        ...data,
+        email: emailValidation.sanitized!,
+      };
+
+      const result = await authService.register(sanitizedData, req);
       res.status(201).json({
         message: "User registered successfully",
         data: result.user,
@@ -63,40 +80,53 @@ export class AuthController {
     try {
       const data: RegisterDto = req.body;
 
-      // validation
-      if (!data.email || !data.email.trim()) {
+      // Validate and sanitize email
+      const emailValidation = validateAndSanitizeEmail(data.email);
+      if (!emailValidation.valid) {
         res.status(400).json({
           error: "Validation error",
-          message: "Email is required",
+          message: emailValidation.message || "Invalid email",
         });
         return;
       }
 
-      if (!data.password || data.password.length < 6) {
+      // Validate password
+      const passwordValidation = isValidPassword(data.password);
+      if (!passwordValidation.valid) {
         res.status(400).json({
           error: "Validation error",
-          message: "Password must be at least 6 characters",
+          message: passwordValidation.message || "Invalid password",
         });
         return;
       }
 
-      if (!data.first_name || !data.first_name.trim()) {
+      // Validate first name
+      const firstNameValidation = validateStringLength(data.first_name, 1, 100, "First name");
+      if (!firstNameValidation.valid) {
         res.status(400).json({
           error: "Validation error",
-          message: "First name is required",
+          message: firstNameValidation.message,
         });
         return;
       }
 
-      if (!data.last_name || !data.last_name.trim()) {
+      // Validate last name
+      const lastNameValidation = validateStringLength(data.last_name, 1, 100, "Last name");
+      if (!lastNameValidation.valid) {
         res.status(400).json({
           error: "Validation error",
-          message: "Last name is required",
+          message: lastNameValidation.message,
         });
         return;
-      } 
+      }
 
-      const result = await authService.registerAdmin(data);
+      // Use sanitized email
+      const sanitizedData: RegisterDto = {
+        ...data,
+        email: emailValidation.sanitized!,
+      };
+
+      const result = await authService.registerAdmin(sanitizedData, req);
       res.status(201).json({
         message: "Admin registered successfully",
         data: result.user,
@@ -112,20 +142,21 @@ export class AuthController {
     }
   }
 
-  async login(req: Request, res: Response): Promise < void> {
-        try {
-          const data: LoginDto = req.body;
+  async login(req: Request, res: Response): Promise<void> {
+    try {
+      const data: LoginDto = req.body;
 
-          // Validation
-          if(!data.email || !data.email.trim()) {
+      // Validate and sanitize email
+      const emailValidation = validateAndSanitizeEmail(data.email);
+      if (!emailValidation.valid) {
         res.status(400).json({
           error: "Validation error",
-          message: "Email is required",
+          message: emailValidation.message || "Invalid email",
         });
         return;
       }
 
-      if (!data.password) {
+      if (!data.password || data.password.trim().length === 0) {
         res.status(400).json({
           error: "Validation error",
           message: "Password is required",
@@ -133,7 +164,13 @@ export class AuthController {
         return;
       }
 
-      const result = await authService.login(data);
+      // Use sanitized email
+      const sanitizedData: LoginDto = {
+        email: emailValidation.sanitized!,
+        password: data.password,
+      };
+
+      const result = await authService.login(sanitizedData, req);
       res.status(200).json({
         message: "Login successful",
         data: result.user,
@@ -165,4 +202,3 @@ export class AuthController {
     }
   }
 }
-

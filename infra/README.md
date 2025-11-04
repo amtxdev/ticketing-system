@@ -18,8 +18,6 @@ This directory contains scripts and configurations for provisioning backend infr
 cd ..
 docker-compose up -d
 
-# Initialize MinIO buckets (one-time setup)
-docker-compose --profile init up minio-init
 
 # Check health
 curl http://localhost:3000/health
@@ -49,7 +47,6 @@ curl http://localhost:3000/health
    - Production: Managed service (RDS, Cloud SQL, etc.)
 
 3. **Object Storage** (S3-compatible)
-   - Local: MinIO
    - Production: S3, Azure Blob, GCS
 
 4. **Authentication Provider**
