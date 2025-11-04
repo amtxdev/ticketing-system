@@ -606,6 +606,379 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Examples & Test Scenarios",
+			"item": [
+				{
+					"name": "Complete User Flow",
+					"item": [
+						{
+							"name": "1. Register User",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"password123\",\n  \"first_name\": \"Test\",\n  \"last_name\": \"User\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/register",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "register"]
+								},
+								"description": "Step 1: Register a new user"
+							}
+						},
+						{
+							"name": "2. Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 200) {",
+											"    const response = pm.response.json();",
+											"    if (response.token) {",
+											"        pm.collectionVariables.set('auth_token', response.token);",
+											"        pm.collectionVariables.set('user_id', response.data.id);",
+											"        pm.collectionVariables.set('user_role', response.data.role);",
+											"    }",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"password123\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/login",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "login"]
+								},
+								"description": "Step 2: Login to get token"
+							}
+						},
+						{
+							"name": "3. View Events (Public)",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/events?status=upcoming",
+									"host": ["{{base_url}}"],
+									"path": ["api", "events"],
+									"query": [
+										{
+											"key": "status",
+											"value": "upcoming"
+										}
+									]
+								},
+								"description": "Step 3: View available events"
+							}
+						},
+						{
+							"name": "4. Purchase Tickets",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{auth_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"quantity\": 2\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/events/{{event_id}}/purchase",
+									"host": ["{{base_url}}"],
+									"path": ["api", "events", "{{event_id}}", "purchase"]
+								},
+								"description": "Step 4: Purchase tickets for an event"
+							}
+						},
+						{
+							"name": "5. View My Tickets",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{auth_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/tickets",
+									"host": ["{{base_url}}"],
+									"path": ["api", "tickets"]
+								},
+								"description": "Step 5: View purchased tickets"
+							}
+						}
+					]
+				},
+				{
+					"name": "Admin Flow",
+					"item": [
+						{
+							"name": "1. Login as Admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 200) {",
+											"    const response = pm.response.json();",
+											"    if (response.token) {",
+											"        pm.collectionVariables.set('auth_token', response.token);",
+											"        pm.collectionVariables.set('user_id', response.data.id);",
+											"        pm.collectionVariables.set('user_role', response.data.role);",
+											"    }",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin123\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/login",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "login"]
+								},
+								"description": "Login with admin credentials"
+							}
+						},
+						{
+							"name": "2. Create Event",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{auth_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"Concert Festival 2025\",\n  \"description\": \"Amazing music festival\",\n  \"venue\": \"Jakarta Convention Center\",\n  \"event_date\": \"2025-12-31T20:00:00Z\",\n  \"total_tickets\": 5000,\n  \"price\": 750000,\n  \"status\": \"upcoming\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/events",
+									"host": ["{{base_url}}"],
+									"path": ["api", "events"]
+								},
+								"description": "Create a new event"
+							}
+						},
+						{
+							"name": "3. List All Users",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{auth_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/users",
+									"host": ["{{base_url}}"],
+									"path": ["api", "users"]
+								},
+								"description": "View all registered users"
+							}
+						},
+						{
+							"name": "4. Update Event Status",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{auth_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"status\": \"live\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/events/{{event_id}}",
+									"host": ["{{base_url}}"],
+									"path": ["api", "events", "{{event_id}}"]
+								},
+								"description": "Update event status to live"
+							}
+						}
+					]
+				},
+				{
+					"name": "Query Examples",
+					"item": [
+						{
+							"name": "Events - Filter by Status",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/events?status=upcoming",
+									"host": ["{{base_url}}"],
+									"path": ["api", "events"],
+									"query": [
+										{
+											"key": "status",
+											"value": "upcoming",
+											"description": "upcoming, live, completed, or cancelled"
+										}
+									]
+								},
+								"description": "Filter events by status"
+							}
+						},
+						{
+							"name": "Events - Filter by Date Range",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/events?from_date=2025-11-01&to_date=2025-12-31",
+									"host": ["{{base_url}}"],
+									"path": ["api", "events"],
+									"query": [
+										{
+											"key": "from_date",
+											"value": "2025-11-01"
+										},
+										{
+											"key": "to_date",
+											"value": "2025-12-31"
+										}
+									]
+								},
+								"description": "Filter events by date range"
+							}
+						},
+						{
+							"name": "Events - Pagination",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/events?limit=10&offset=0",
+									"host": ["{{base_url}}"],
+									"path": ["api", "events"],
+									"query": [
+										{
+											"key": "limit",
+											"value": "10"
+										},
+										{
+											"key": "offset",
+											"value": "0"
+										}
+									]
+								},
+								"description": "Paginated events list"
+							}
+						},
+						{
+							"name": "Users - Filter by Role",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{auth_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/users?role=user&is_active=true",
+									"host": ["{{base_url}}"],
+									"path": ["api", "users"],
+									"query": [
+										{
+											"key": "role",
+											"value": "user"
+										},
+										{
+											"key": "is_active",
+											"value": "true"
+										}
+									]
+								},
+								"description": "Filter users by role and active status"
+							}
+						},
+						{
+							"name": "Tickets - Filter by Status",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{auth_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/tickets?status=purchased",
+									"host": ["{{base_url}}"],
+									"path": ["api", "tickets"],
+									"query": [
+										{
+											"key": "status",
+											"value": "purchased"
+										}
+									]
+								},
+								"description": "Filter tickets by status"
+							}
+						}
+					]
+				}
+			]
 		}
 	],
 	"variable": [
@@ -633,6 +1006,18 @@
 			"key": "admin_registration_secret",
 			"value": "",
 			"description": "Set this in Postman environment if ADMIN_REGISTRATION_SECRET is configured",
+			"type": "string"
+		},
+		{
+			"key": "event_id",
+			"value": "1",
+			"description": "Event ID for testing purchase and event operations",
+			"type": "string"
+		},
+		{
+			"key": "ticket_id",
+			"value": "1",
+			"description": "Ticket ID for testing ticket operations",
 			"type": "string"
 		}
 	]

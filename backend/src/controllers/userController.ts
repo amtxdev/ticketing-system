@@ -117,7 +117,28 @@ export class UserController {
         return;
       }
 
+      const requesterRole = req.user?.role;
+      const requesterId = req.user?.userId;
       const data: UpdateUserDto = req.body;
+
+      // Non-admins cannot change role or is_active, even for themselves
+      if (requesterRole !== "admin") {
+        if (data.role !== undefined) {
+          res.status(403).json({
+            error: "Forbidden",
+            message: "Only admins can change user roles",
+          });
+          return;
+        }
+        if (data.is_active !== undefined) {
+          res.status(403).json({
+            error: "Forbidden",
+            message: "Only admins can change user active status",
+          });
+          return;
+        }
+      }
+
       const user = await userService.updateUser(id, data);
 
       if (!user) {

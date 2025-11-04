@@ -3,7 +3,7 @@
 // Demonstrates login flow, token storage, and redirect after successful login
 
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { validateEmail } from '../utils/validation';
 
@@ -224,16 +224,19 @@ export const LoginPage: React.FC = () => {
         </button>
       </form>
 
-      <div style={{ marginTop: '1.5rem', fontSize: '0.9rem', color: '#6b7280' }}>
+      <div style={{ marginTop: '1.5rem', fontSize: '0.9rem', color: '#6b7280', textAlign: 'center' }}>
         <p>
-          Don't have an account? <a href="#register" onClick={(e) => {
-            e.preventDefault();
-            alert('Registration page not implemented in this scaffold');
-          }} style={{
-            color: '#6366f1',
-            fontWeight: '600',
-            textDecoration: 'none'
-          }}>Register</a>
+          Don't have an account?{' '}
+          <Link 
+            to="/register" 
+            style={{
+              color: '#6366f1',
+              fontWeight: '600',
+              textDecoration: 'none'
+            }}
+          >
+            Register
+          </Link>
         </p>
       </div>
     </div>

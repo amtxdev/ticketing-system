@@ -5,9 +5,11 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { LoginPage } from './pages/LoginPage';
+import { RegistrationPage } from './pages/RegistrationPage';
 import { EventsPage } from './pages/EventsPage';
 import { PurchasePage } from './pages/PurchasePage';
 import { AdminEventsPage } from './pages/AdminEventsPage';
+import { AdminUsersPage } from './pages/AdminUsersPage';
 import './App.css';
 
 function App() {
@@ -17,6 +19,7 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegistrationPage />} />
           <Route path="/events" element={<EventsPage />} />
 
           {/* Protected routes - require authentication */}
@@ -35,6 +38,14 @@ function App() {
             element={
               <ProtectedRoute requireAdmin={true}>
                 <AdminEventsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminUsersPage />
               </ProtectedRoute>
             }
           />

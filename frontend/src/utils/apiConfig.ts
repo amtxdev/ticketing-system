@@ -17,6 +17,13 @@ export const API_ENDPOINTS = {
     update: (id: number) => `${API_BASE_URL}/events/${id}`,
     delete: (id: number) => `${API_BASE_URL}/events/${id}`,
   },
+  users: {
+    list: `${API_BASE_URL}/users`,
+    getById: (id: number) => `${API_BASE_URL}/users/${id}`,
+    create: `${API_BASE_URL}/users`,
+    update: (id: number) => `${API_BASE_URL}/users/${id}`,
+    delete: (id: number) => `${API_BASE_URL}/users/${id}`,
+  },
 } as const;
 
 export default API_BASE_URL;
