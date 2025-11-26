@@ -1,3 +1,5 @@
+name: ticketing-system
+
 services:
   # PostgreSQL Database - Production-ready configuration
   postgres:
@@ -150,6 +152,37 @@ services:
           cpus: '0.1'
           memory: 64M
 
+ # Nginx Load Balancer for Frontend - Distributes requests across frontend instances
+  nginx-lb-frontend:
+    image: nginx:alpine
+    container_name: ticketing-nginx-lb-frontend
+    ports:
+      - "3001:80"        # Expose load balancer on frontend port
+      - "8081:8080"      # Health check port
+    volumes:
+      - ./infra/nginx-lb/frontend-lb.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - ticketing-network
+    depends_on:
+      - frontend-1
+      - frontend-2
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+
+
   # Frontend Instance 1 - React application served with nginx
   frontend-1:
     build:
@@ -218,37 +251,7 @@ services:
         reservations:
           cpus: '0.1'
           memory: 64M
-
-  # Nginx Load Balancer for Frontend - Distributes requests across frontend instances
-  nginx-lb-frontend:
-    image: nginx:alpine
-    container_name: ticketing-nginx-lb-frontend
-    ports:
-      - "3001:80"        # Expose load balancer on frontend port
-      - "8081:8080"      # Health check port
-    volumes:
-      - ./infra/nginx-lb/frontend-lb.conf:/etc/nginx/nginx.conf:ro
-    networks:
-      - ticketing-network
-    depends_on:
-      - frontend-1
-      - frontend-2
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 128M
-        reservations:
-          cpus: '0.1'
-          memory: 64M
-
+ 
 volumes:
   postgres_data:
     # Persistent volume - data survives container removal
